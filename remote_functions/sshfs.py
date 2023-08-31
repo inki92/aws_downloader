@@ -53,6 +53,7 @@ class SSHFS():
         """
         self.check_sshfs_package()
         mount = f"sudo sshfs -o IdentityFile={self.pem_key_path} " \
+                f"-o StrictHostKeyChecking=no " \
                 f"{self.user}@{ip_address}:{self.remote_path} " \
                 f"{self.local_path}"
         result = subprocess.run(mount, shell=True,
