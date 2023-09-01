@@ -3,7 +3,7 @@
 import subprocess
 
 
-class SSHFS():
+class SSHFS:
 
     """Class for mount sshfs mount from instance to local machine."""
     def __init__(self, logger, user, pem_key_path, remote_path, local_path):

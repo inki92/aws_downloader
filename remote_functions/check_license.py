@@ -49,3 +49,4 @@ class CheckLicense:
             self.logger.error("WARNING!!! "
                               "License checksums do not match and was changed")
             sys.exit(1)
+

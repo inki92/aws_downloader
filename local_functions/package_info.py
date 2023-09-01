@@ -178,3 +178,4 @@ class PackageInfo:
 
         rpm_info[self.package_path] = info
         return rpm_info
+

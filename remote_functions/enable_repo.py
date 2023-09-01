@@ -55,3 +55,4 @@ class EnableRepo:
         except Exception as e:
             self.logger.error("Additional repositories can't be enabled. Trying to repeate.")
             raise e
+

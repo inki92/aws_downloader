@@ -4,12 +4,11 @@ import re
 from modules.ssh_client import SSHClient
 
 
-class DownloadPackage():
+class DownloadPackage:
     """Class for downloading rpm on the instance."""
 
-    def __init__(self, logger, path_to_download, user, key_path, package_name):
+    def __init__(self, logger, path_to_download, user, key_path):
         self.logger = logger
-        self.package_name = package_name
         self.path_to_download = path_to_download
         self.user = user
         self.key_path = key_path
@@ -23,14 +22,18 @@ class DownloadPackage():
         :param ip_address: address of the instance
         :return: status
         """
-        command = (f'sudo mkdir {self.path_to_download}')
-        self.logger.info("Trying to create directory for download packages:")
-        result = self.ssh_client.execute_ssh_command(self.user, command, ip_address, self.key_path)
-        if result == 0:
-            self.logger.info(f"Directory {self.path_to_download} created.")
-        else:
-            self.logger.error(f"Can't create directory {self.path_to_download}. Trying...")
-        return result
+        try:
+            command = (f'sudo mkdir {self.path_to_download}')
+            self.logger.info("Trying to create directory for download packages:")
+            result = self.ssh_client.execute_ssh_command(self.user, command, ip_address, self.key_path)
+            if result == 0:
+                self.logger.info(f"Directory {self.path_to_download} created.")
+            #else:
+            #    self.logger.error(f"Can't create directory {self.path_to_download}. Trying...")
+            return result
+        except Exception as e:
+            self.logger.error(f"Can't create directory {self.path_to_download}")
+            raise e
 
     def check_directory(self, ip_address):
         """
@@ -40,19 +43,15 @@ class DownloadPackage():
         :param ip_address: address of the instance
         :return: status
         """
+        command = (f'sudo ls {self.path_to_download}')
         try:
-            command = (f'sudo ls {self.path_to_download}')
-            result = self.ssh_client.execute_ssh_command(self.user,
-                                                         command, ip_address,
-                                                         self.key_path)
+            result = self.ssh_client.execute_ssh_command(self.user, command, ip_address, self.key_path)
             if result == 0:
                 self.logger.info(f"Directory exists: {self.path_to_download}")
-            return result
         except Exception as e:
-            self.logger.error(f"Can't create directory {self.path_to_download}.")
-            raise e
+            self.logger.error(e)
 
-    def download_command(self, ip_address, package_name):
+    def download_package(self, ip_address, package_name):
         """
         Method for download rpm package to the instance.
 
@@ -79,16 +78,31 @@ class DownloadPackage():
         except:
             self.logger.error(f"Can't download {package_name}")
 
-    def download_package(self, ip_address, package_name):
-        """
-        Method for create path and download rpm package to the instance.
 
-        :param ip_address: address of the instance
-        :param package_name: name of the rpm package
-        :return: status
-        """
+class PackagesDownload:
+    """
+    Class for download all packages from list
+    """
+    def __init__(self, logger, path_to_download, user, key_path, ip_address, packages):
+        self.logger = logger
+        self.packages = packages
+        self.path_to_download = path_to_download
+        self.user = user
+        self.key_path = key_path
+        self.ip_address = ip_address
+        self.ssh_client = SSHClient(self.logger)
 
-        check_dir_result = self.check_directory(ip_address)
-        if check_dir_result != 0:
-            self.create_path(ip_address)
-        self.download_command(ip_address, package_name)
+    def download_all(self):
+        """
+        Method for download all packages to the instance.
+        """
+        download_package = DownloadPackage(self.logger, self.path_to_download, self.user, self.key_path)
+        download_package.create_path(self.ip_address)
+        download_package.check_directory(self.ip_address)
+        for package_name in self.packages:
+            try:
+                download_package.download_package(self.ip_address, package_name)
+            except Exception as e:
+                self.logger.error(f"Can't download {package_name}")
+                self.logger.error(e)
+        self.logger.info(f"All packages were downloaded.")
