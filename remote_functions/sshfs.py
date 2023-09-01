@@ -65,6 +65,7 @@ class SSHFS():
                              f"is mounted to {self.remote_path}")
         else:
             self.logger.error(f"Error: {result.stderr.decode('utf-8')}")
+            raise Exception
 
     def unmount(self, mount_point):
         """Method for umount sshfs folder."""

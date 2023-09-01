@@ -30,9 +30,12 @@ class SSHClient:
             output = stdout.read().decode('utf-8')
             self.logger.info(output)
             status_code = stdout.channel.recv_exit_status()
+            if status_code != 0:
+                self.logger.error(f"Error: Can't execute \"{command}\" by SSHClient. Trying...")
+                raise Exception
             return status_code
-        except Exception as e:
-            self.logger.error(f"Error: {e}")
+        except Exception as error:
+            raise error
         finally:
             ssh_client.close()
 

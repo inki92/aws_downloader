@@ -1,4 +1,4 @@
-"""Module for enabling extra repositories on the instance."""
+"""Module for enabling extra repositories om the instance."""
 
 from modules.ssh_client import SSHClient
 from retrying import retry
@@ -40,14 +40,18 @@ class EnableRepo:
             self.logger.info("Repositories disabled, try to enable...")
         return result
 
-    @retry(stop_max_attempt_number=5, wait_fixed=1000)
+    @retry(stop_max_attempt_number=2, wait_fixed=1000)
     def enable_check(self, ip_address):
         """
         Combined method for one way enabling and checking repos.
 
         :param ip_address: ip of the instance.
         """
-        self.enable_repo(ip_address)
-        result = self.check_repo(ip_address)
-        if result != 0:
-            raise Exception("ERROR!!! Repositories can't be enabled.")
+        try:
+            self.enable_repo(ip_address)
+            result = self.check_repo(ip_address)
+            if result != 0:
+                raise Exception
+        except Exception as e:
+            self.logger.error("Additional repositories can't be enabled. Trying to repeate.")
+            raise e
