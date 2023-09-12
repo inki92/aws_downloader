@@ -3,14 +3,14 @@
 import boto3
 import time
 from retrying import retry
-from config.conf import Config
+import config.conf as config
 
 
 class EC2Manager:
     """Class for manage aws ec2 instance."""
     def __init__(self, release, logger):
         self.release = release
-        self.config = Config()
+        self.config = config
         self.client = self._create_ec2_client()
         self.logger = logger
 
@@ -76,7 +76,7 @@ class InstanceService:
     def __init__(self, release, logger):
         self.release = release
         self.logger = logger
-        self.config = Config()
+        self.config = config
         self.ec2_manager = EC2Manager(self.release, self.logger)
 
     @retry(stop_max_attempt_number=5, wait_fixed=1000)

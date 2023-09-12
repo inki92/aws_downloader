@@ -1,5 +1,5 @@
 """Main script"""
-from config.conf import Config
+import config.conf as config
 from logger.logger import Logger
 from modules.ec2_manager import EC2Manager
 from modules.ssh_client import SSHClient
@@ -7,11 +7,11 @@ from remote_functions.check_license import CheckLicense
 from remote_functions.sshfs import SSHFS
 from remote_functions.enable_repo import EnableRepo
 
-from modules.ec2_manager import Instance
+# from modules.ec2_manager import Instance
+from modules.gcp_manager import GCPManager
 
 
 if __name__ == "__main__":
-  config = Config()
   logger_instance = Logger()
   logger = logger_instance.logger
   check_license = CheckLicense(logger,
@@ -25,7 +25,8 @@ if __name__ == "__main__":
   enable_repo = EnableRepo(logger, config.instance_user, config.private_key_path)
 
 # INSTANCE MANAGER START
-  instance_9 = Instance(9, logger)
+  instance_9 = GCPManager(9, logger)
+  instance_9.run_instance()
   instance_ip = instance_9.instance_ip()
 
 # NEW REMOTE FUNCTIONS START
